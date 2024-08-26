@@ -3,9 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="index.js" defer></script>
+    <title>Google Search</title>
   </head>
   <body>
-    <p>Hello World!</p>
+    <header>
+      <a href="index.html">Google Search</a>
+      <a href="image_search.html">Image Search</a>
+      <a href="advanced_search.html">Advanced Search</a>
+    </header>
+    <main>
+      <form action="https://www.google.com/search" method="get">
+        <input type="text" name="q" id="q" />
+        <div id="div-s">
+          <input type="submit" value="Google Search" />
+          <input type="submit" value="I'm lucky" name="btnI" />
+        </div>
+      </form>
+    </main>
+    <footer></footer>
   </body>
 </html>
