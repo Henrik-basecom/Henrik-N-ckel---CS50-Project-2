@@ -52,7 +52,7 @@ function load_mail(mail_id) {
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#email-view').style.display = 'block';
 
-  document.querySelector('#email-view').innerHTML = mail_id;
+  //document.querySelector('#email-view').innerHTML = mail_id;
 }
 
 //Compose Mail
