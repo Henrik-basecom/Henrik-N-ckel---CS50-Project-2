@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function compose_email() {
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -34,6 +35,7 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${
@@ -42,6 +44,15 @@ function load_mailbox(mailbox) {
 
   if (mailbox === 'sent') ex_sent_mailbox();
   if (mailbox === 'inbox') ex_inbox_mailbox();
+}
+
+function load_mail(mail_id) {
+  // Show the mailbox and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'block';
+
+  document.querySelector('#email-view').innerHTML = mail_id;
 }
 
 //Compose Mail
@@ -98,4 +109,26 @@ function ex_sent_mailbox() {
 }
 
 //Inbox Mailbox
-function ex_inbox_mailbox() {}
+function ex_inbox_mailbox() {
+  async function get() {
+    let response = await fetch('/emails/inbox');
+    response = await response.json();
+    if (!response) return;
+
+    response.forEach((obj) => {
+      const div = document.createElement('div');
+      div.style.border = '1px solid #000000';
+      div.style.marginBottom = '5px';
+      div.style.padding = '5px';
+      if (obj.read) div.style.background = '#d3d3d3';
+      div.innerHTML = `Subject: "${obj.subject}" From: "${obj.sender}" At: "${obj.timestamp}"`;
+
+      div.addEventListener('click', (event) => {
+        load_mail(obj.id);
+      });
+
+      document.querySelector('#emails-view').appendChild(div);
+    });
+  }
+  get();
+}
