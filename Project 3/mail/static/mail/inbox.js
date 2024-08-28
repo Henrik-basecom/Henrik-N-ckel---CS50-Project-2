@@ -79,8 +79,12 @@ function load_mail(mail_id) {
 
 //Compose Mail
 function ex_compose_mail() {
+  //remove old eventlisteners
   const form = document.querySelector('#compose-form');
-  form.addEventListener('submit', (event) => {
+  const newForm = form.cloneNode(true);
+  form.parentNode.replaceChild(newForm, form);
+
+  newForm.addEventListener('submit', (event) => {
     const recipients = document.querySelector('#compose-recipients').value;
     const subject = document.querySelector('#compose-subject').value;
     const body = document.querySelector('#compose-body').value;
@@ -117,14 +121,7 @@ function ex_sent_mailbox() {
     if (!response) return;
 
     response.forEach((obj) => {
-      const div = document.createElement('div');
-      div.style.border = '1px solid #000000';
-      div.style.marginBottom = '5px';
-      div.style.padding = '5px';
-      div.innerHTML = `Subject: "${obj.subject}" To: "${obj.recipients[0]}${
-        obj.recipients.length > 1 ? ', ...' : ''
-      }" At: "${obj.timestamp}"`;
-      document.querySelector('#emails-view').appendChild(div);
+      foreach_mailbox(obj);
     });
   }
   get();
@@ -138,18 +135,7 @@ function ex_inbox_mailbox() {
     if (!response) return;
 
     response.forEach((obj) => {
-      const div = document.createElement('div');
-      div.style.border = '1px solid #000000';
-      div.style.marginBottom = '5px';
-      div.style.padding = '5px';
-      if (obj.read) div.style.background = '#d3d3d3';
-      div.innerHTML = `Subject: "${obj.subject}" From: "${obj.sender}" At: "${obj.timestamp}"`;
-
-      div.addEventListener('click', (event) => {
-        load_mail(obj.id);
-      });
-
-      document.querySelector('#emails-view').appendChild(div);
+      foreach_mailbox(obj, true);
     });
   }
   get();
@@ -163,18 +149,7 @@ function ex_archive_mailbox() {
     if (!response) return;
 
     response.forEach((obj) => {
-      const div = document.createElement('div');
-      div.style.border = '1px solid #000000';
-      div.style.marginBottom = '5px';
-      div.style.padding = '5px';
-      if (obj.read) div.style.background = '#d3d3d3';
-      div.innerHTML = `Subject: "${obj.subject}" From: "${obj.sender}" At: "${obj.timestamp}"`;
-
-      div.addEventListener('click', (event) => {
-        load_mail(obj.id);
-      });
-
-      document.querySelector('#emails-view').appendChild(div);
+      foreach_mailbox(obj, true);
     });
   }
   get();
@@ -220,10 +195,12 @@ function ex_load_mail(mail_id) {
   get();
 }
 
+//Helper Functions
 function clear_mailbox() {
   document.querySelector('#emails-view').innerHTML = '';
 }
 
+//Add functionality to reply button
 function event_rply(event) {
   const preFill = {
     sen: this.dataset.sen,
@@ -236,6 +213,7 @@ function event_rply(event) {
   compose_email(preFill);
 }
 
+//Add functionality to archive button
 function event_archive(event) {
   const mail_id = this.dataset.id;
   async function archive() {
@@ -252,6 +230,7 @@ function event_archive(event) {
   archive();
 }
 
+//Add functionality to unarchive button
 function event_unarchive(event) {
   const mail_id = this.dataset.id;
   async function archive() {
@@ -266,4 +245,23 @@ function event_unarchive(event) {
     load_mailbox('inbox');
   }
   archive();
+}
+
+//Take sql obj and create/append a new node to the mail view
+function foreach_mailbox(obj, el) {
+  const div = document.createElement('div');
+  div.style.border = '1px solid #000000';
+  div.style.marginBottom = '5px';
+  div.style.padding = '5px';
+  div.innerHTML = `Subject: "${obj.subject}" From: "${obj.sender}" At: "${obj.timestamp}"`;
+
+  if (el) {
+    div.addEventListener('click', (event) => {
+      load_mail(obj.id);
+    });
+    div.style.cursor = 'pointer';
+    if (obj.read) div.style.background = '#d3d3d3';
+  }
+
+  document.querySelector('#emails-view').appendChild(div);
 }
