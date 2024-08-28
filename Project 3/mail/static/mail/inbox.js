@@ -17,16 +17,25 @@ document.addEventListener('DOMContentLoaded', function () {
   load_mailbox('inbox');
 });
 
-function compose_email() {
+function compose_email(preFill) {
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
-  document.querySelector('#compose-recipients').value = '';
-  document.querySelector('#compose-subject').value = '';
-  document.querySelector('#compose-body').value = '';
+  const rec = document.querySelector('#compose-recipients');
+  const sub = document.querySelector('#compose-subject');
+  const bod = document.querySelector('#compose-body');
+  rec.value = '';
+  sub.value = '';
+  bod.value = '';
+
+  if (preFill) {
+    rec.value = preFill.sen;
+    sub.value = preFill.sub;
+    bod.value = preFill.bod;
+  }
 
   ex_compose_mail();
 }
@@ -52,7 +61,7 @@ function load_mail(mail_id) {
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#email-view').style.display = 'block';
 
-  //document.querySelector('#email-view').innerHTML = mail_id;
+  ex_load_mail(mail_id);
 }
 
 //Compose Mail
@@ -128,6 +137,35 @@ function ex_inbox_mailbox() {
       });
 
       document.querySelector('#emails-view').appendChild(div);
+    });
+  }
+  get();
+}
+
+function ex_load_mail(mail_id) {
+  async function get() {
+    console.log(typeof mail_id, mail_id);
+    let response = await fetch(`/emails/${mail_id}`);
+    response = await response.json();
+    if (!response) return;
+    console.log(response);
+
+    document.querySelector('#email-view h2').innerHTML = response.subject;
+    document.querySelector('.mail-row-view h3').innerHTML = response.sender;
+    document.querySelector('#mail_timestamp').innerHTML = response.timestamp;
+    document.querySelector('#mail_recipients').innerHTML = response.recipients;
+    document.querySelector('.body-text').innerHTML = response.body;
+
+    document.querySelector('#btn-rply').addEventListener('click', (event) => {
+      const preFill = {
+        sen: response.sender,
+        sub: /Re:/.test(response.subject)
+          ? response.subject
+          : `Re: ${response.subject}`,
+        bod: `On: ${response.timestamp} ${response.sender} wrote: ${response.body}\n\n`,
+      };
+
+      compose_email(preFill);
     });
   }
   get();
