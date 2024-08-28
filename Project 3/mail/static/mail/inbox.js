@@ -231,30 +231,31 @@ function clear_mailbox() {
 function event_archive(event) {
   const mail_id = this.dataset.id;
   async function archive() {
-    let response2 = await fetch(`/emails/${mail_id}`, {
+    let response = await fetch(`/emails/${mail_id}`, {
       method: 'PUT',
       body: JSON.stringify({
         archived: true,
       }),
     });
-    console.log('ARCHIVED: ', response2.status);
+    console.log('ARCHIVED: ', response.status);
+    if (response.status != 204) return;
+    load_mailbox('inbox');
   }
   archive();
-  load_mailbox('inbox');
 }
 
 function event_unarchive(event) {
   const mail_id = this.dataset.id;
-  console.log(mail_id);
   async function archive() {
-    let response2 = await fetch(`/emails/${mail_id}`, {
+    let response = await fetch(`/emails/${mail_id}`, {
       method: 'PUT',
       body: JSON.stringify({
         archived: false,
       }),
     });
-    console.log('ARCHIVED: ', response2.status);
+    console.log('ARCHIVED: ', response.status);
+    if (response.status != 204) return;
+    load_mailbox('inbox');
   }
   archive();
-  load_mailbox('inbox');
 }
