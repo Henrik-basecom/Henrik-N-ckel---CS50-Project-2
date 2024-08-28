@@ -16,3 +16,20 @@ h6,
 .mail-row-view p {
   margin-bottom: 5px;
 }
+
+.body-text {
+  min-height: 500px;
+  padding: 5px;
+
+  border: 1px solid lightgray;
+  border-radius: 5px;
+}
+
+#mail_recipients,
+#mail_sender {
+  padding: 5px;
+  margin-bottom: 5px;
+
+  border: 1px solid lightgray;
+  border-radius: 5px;
+}
