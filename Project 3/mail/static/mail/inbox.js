@@ -158,6 +158,17 @@ function ex_load_mail(mail_id) {
     }${response.recipients.length > 1 ? ', ...' : ''}`;
     document.querySelector('.body-text').innerHTML = response.body;
 
+    async function markRead() {
+      let response2 = await fetch(`/emails/${mail_id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          read: true,
+        }),
+      });
+      console.log('READ UPDATED: ', response2.status);
+    }
+    markRead();
+
     document.querySelector('#btn-rply').addEventListener('click', (event) => {
       const preFill = {
         sen: response.sender,
@@ -169,6 +180,36 @@ function ex_load_mail(mail_id) {
 
       compose_email(preFill);
     });
+
+    document
+      .querySelector('#btn-archive')
+      .addEventListener('click', (event) => {
+        async function archive() {
+          let response2 = await fetch(`/emails/${mail_id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              archived: true,
+            }),
+          });
+          console.log('ARCHIVED: ', response2.status);
+        }
+        archive();
+      });
+
+    document
+      .querySelector('#btn-unarchive')
+      .addEventListener('click', (event) => {
+        async function archive() {
+          let response2 = await fetch(`/emails/${mail_id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              archived: false,
+            }),
+          });
+          console.log('ARCHIVED: ', response2.status);
+        }
+        archive();
+      });
   }
   get();
 }
