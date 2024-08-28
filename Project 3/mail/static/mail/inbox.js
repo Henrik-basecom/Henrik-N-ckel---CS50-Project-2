@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
   load_mailbox('inbox');
 
   // Add mail buttons
+  document.querySelector('#btn-rply').addEventListener('click', event_rply);
   document
     .querySelector('#btn-archive')
     .addEventListener('click', event_archive);
@@ -195,8 +196,15 @@ function ex_load_mail(mail_id) {
       response.recipients[0]
     }${response.recipients.length > 1 ? ', ...' : ''}`;
     document.querySelector('.body-text').innerHTML = response.body;
+
     document.querySelector('#btn-archive').dataset.id = mail_id;
     document.querySelector('#btn-unarchive').dataset.id = mail_id;
+
+    const btn_rply = document.querySelector('#btn-rply');
+    btn_rply.dataset.sen = response.sender;
+    btn_rply.dataset.sub = response.subject;
+    btn_rply.dataset.tim = response.timestamp;
+    btn_rply.dataset.bod = response.body;
 
     async function markRead() {
       let response2 = await fetch(`/emails/${mail_id}`, {
@@ -208,24 +216,24 @@ function ex_load_mail(mail_id) {
       console.log('READ UPDATED: ', response2.status);
     }
     markRead();
-
-    document.querySelector('#btn-rply').addEventListener('click', (event) => {
-      const preFill = {
-        sen: response.sender,
-        sub: /Re:/.test(response.subject)
-          ? response.subject
-          : `Re: ${response.subject}`,
-        bod: `On: ${response.timestamp} ${response.sender} wrote: ${response.body}\n\n`,
-      };
-
-      compose_email(preFill);
-    });
   }
   get();
 }
 
 function clear_mailbox() {
   document.querySelector('#emails-view').innerHTML = '';
+}
+
+function event_rply(event) {
+  const preFill = {
+    sen: this.dataset.sen,
+    sub: /Re:/.test(this.dataset.sub)
+      ? this.dataset.sub
+      : `Re: ${this.dataset.sub}`,
+    bod: `On: ${this.dataset.tim} ${this.dataset.sen} wrote: ${this.dataset.bod}\n\n`,
+  };
+
+  compose_email(preFill);
 }
 
 function event_archive(event) {
