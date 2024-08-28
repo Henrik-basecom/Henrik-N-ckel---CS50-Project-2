@@ -1,3 +1,18 @@
 textarea {
-    min-height: 400px;
+  min-height: 400px;
+}
+
+.mail-row-view {
+  display: flex;
+  justify-content: space-between;
+}
+
+#mail_recipients,
+.body-text {
+  margin-bottom: 30px;
+}
+
+h6,
+.mail-row-view p {
+  margin-bottom: 5px;
 }

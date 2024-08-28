@@ -144,16 +144,18 @@ function ex_inbox_mailbox() {
 
 function ex_load_mail(mail_id) {
   async function get() {
-    console.log(typeof mail_id, mail_id);
     let response = await fetch(`/emails/${mail_id}`);
     response = await response.json();
     if (!response) return;
-    console.log(response);
 
     document.querySelector('#email-view h2').innerHTML = response.subject;
-    document.querySelector('.mail-row-view h3').innerHTML = response.sender;
+    document.querySelector(
+      '.mail-row-view h6'
+    ).innerHTML = `From: ${response.sender}`;
     document.querySelector('#mail_timestamp').innerHTML = response.timestamp;
-    document.querySelector('#mail_recipients').innerHTML = response.recipients;
+    document.querySelector('#mail_recipients').innerHTML = `To: ${
+      response.recipients[0]
+    }${response.recipients.length > 1 ? ', ...' : ''}`;
     document.querySelector('.body-text').innerHTML = response.body;
 
     document.querySelector('#btn-rply').addEventListener('click', (event) => {
