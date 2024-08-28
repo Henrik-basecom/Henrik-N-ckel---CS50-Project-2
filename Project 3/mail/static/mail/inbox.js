@@ -95,7 +95,7 @@ function ex_compose_mail() {
         body: JSON.stringify({
           recipients: recipients,
           subject: subject,
-          body: body,
+          body: body.replace(/^On.+?wrote:/, '').trim(),
         }),
       });
       response = await response.json();
@@ -188,7 +188,6 @@ function ex_load_mail(mail_id) {
           read: true,
         }),
       });
-      console.log('READ UPDATED: ', response2.status);
     }
     markRead();
   }
@@ -207,7 +206,7 @@ function event_rply(event) {
     sub: /Re:/.test(this.dataset.sub)
       ? this.dataset.sub
       : `Re: ${this.dataset.sub}`,
-    bod: `On: ${this.dataset.tim} ${this.dataset.sen} wrote: ${this.dataset.bod}\n\n`,
+    bod: `On: ${this.dataset.tim} ${this.dataset.sen} wrote: ${this.dataset.bod} >>\n\n`,
   };
 
   compose_email(preFill);
@@ -253,7 +252,10 @@ function foreach_mailbox(obj, el) {
   div.style.border = '1px solid #000000';
   div.style.marginBottom = '5px';
   div.style.padding = '5px';
-  div.innerHTML = `Subject: "${obj.subject}" From: "${obj.sender}" At: "${obj.timestamp}"`;
+  const temp = el
+    ? `From: "${obj.sender}"`
+    : `To: "${obj.recipients[0]}${obj.recipients.length > 1 ? ', ...' : ''}”`;
+  div.innerHTML = `Subject: "${obj.subject}" ${temp} At: "${obj.timestamp}"`;
 
   if (el) {
     div.addEventListener('click', (event) => {
