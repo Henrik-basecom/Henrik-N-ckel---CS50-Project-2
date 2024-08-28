@@ -15,6 +15,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // By default, load the inbox
   load_mailbox('inbox');
+
+  // Add mail buttons
+  document
+    .querySelector('#btn-archive')
+    .addEventListener('click', event_archive);
+  document
+    .querySelector('#btn-unarchive')
+    .addEventListener('click', event_unarchive);
 });
 
 function compose_email(preFill) {
@@ -41,6 +49,9 @@ function compose_email(preFill) {
 }
 
 function load_mailbox(mailbox) {
+  //Clear previous entries
+  clear_mailbox();
+
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
@@ -53,6 +64,7 @@ function load_mailbox(mailbox) {
 
   if (mailbox === 'sent') ex_sent_mailbox();
   if (mailbox === 'inbox') ex_inbox_mailbox();
+  if (mailbox === 'archive') ex_archive_mailbox();
 }
 
 function load_mail(mail_id) {
@@ -142,6 +154,32 @@ function ex_inbox_mailbox() {
   get();
 }
 
+//Archive Mailbox
+function ex_archive_mailbox() {
+  async function get() {
+    let response = await fetch('/emails/archive');
+    response = await response.json();
+    if (!response) return;
+
+    response.forEach((obj) => {
+      const div = document.createElement('div');
+      div.style.border = '1px solid #000000';
+      div.style.marginBottom = '5px';
+      div.style.padding = '5px';
+      if (obj.read) div.style.background = '#d3d3d3';
+      div.innerHTML = `Subject: "${obj.subject}" From: "${obj.sender}" At: "${obj.timestamp}"`;
+
+      div.addEventListener('click', (event) => {
+        load_mail(obj.id);
+      });
+
+      document.querySelector('#emails-view').appendChild(div);
+    });
+  }
+  get();
+}
+
+//Load Mail
 function ex_load_mail(mail_id) {
   async function get() {
     let response = await fetch(`/emails/${mail_id}`);
@@ -157,6 +195,8 @@ function ex_load_mail(mail_id) {
       response.recipients[0]
     }${response.recipients.length > 1 ? ', ...' : ''}`;
     document.querySelector('.body-text').innerHTML = response.body;
+    document.querySelector('#btn-archive').dataset.id = mail_id;
+    document.querySelector('#btn-unarchive').dataset.id = mail_id;
 
     async function markRead() {
       let response2 = await fetch(`/emails/${mail_id}`, {
@@ -180,36 +220,41 @@ function ex_load_mail(mail_id) {
 
       compose_email(preFill);
     });
-
-    document
-      .querySelector('#btn-archive')
-      .addEventListener('click', (event) => {
-        async function archive() {
-          let response2 = await fetch(`/emails/${mail_id}`, {
-            method: 'PUT',
-            body: JSON.stringify({
-              archived: true,
-            }),
-          });
-          console.log('ARCHIVED: ', response2.status);
-        }
-        archive();
-      });
-
-    document
-      .querySelector('#btn-unarchive')
-      .addEventListener('click', (event) => {
-        async function archive() {
-          let response2 = await fetch(`/emails/${mail_id}`, {
-            method: 'PUT',
-            body: JSON.stringify({
-              archived: false,
-            }),
-          });
-          console.log('ARCHIVED: ', response2.status);
-        }
-        archive();
-      });
   }
   get();
+}
+
+function clear_mailbox() {
+  document.querySelector('#emails-view').innerHTML = '';
+}
+
+function event_archive(event) {
+  const mail_id = this.dataset.id;
+  async function archive() {
+    let response2 = await fetch(`/emails/${mail_id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        archived: true,
+      }),
+    });
+    console.log('ARCHIVED: ', response2.status);
+  }
+  archive();
+  load_mailbox('inbox');
+}
+
+function event_unarchive(event) {
+  const mail_id = this.dataset.id;
+  console.log(mail_id);
+  async function archive() {
+    let response2 = await fetch(`/emails/${mail_id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        archived: false,
+      }),
+    });
+    console.log('ARCHIVED: ', response2.status);
+  }
+  archive();
+  load_mailbox('inbox');
 }
